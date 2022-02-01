@@ -1,0 +1,9 @@
+numpy
+matplotlib
+scipy
+tqdm
+ipython
+ipykernel
+ipywidgets
+jupyter
+seaborn
