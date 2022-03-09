@@ -6,7 +6,7 @@ from inventory_states import NonPerishableInventoryState
 
 class CostStructure :
 
-    COSTS = ["fixed_cost", "purchase_cost", "holding_cost", "stockout_cost"]
+    COSTS = ["fixed_cost", "purchase_cost", "holding_cost", "stockout_cost", "holding_cost_gradient", "stockout_cost_gradient"]
 
     def __init__(self, nb_products, fixed_costs, purchase_costs, holding_costs, stockout_costs) :
         self.nb_products = nb_products
@@ -33,6 +33,8 @@ class CostStructure :
             self.costs_history.loc[(t,k),"purchase_cost"] = self.purchase_costs[k]*order_quantities[k]
             self.costs_history.loc[(t,k),"holding_cost"] = self.holding_costs[k]*np.maximum(0,inventory_state.movements.loc[(t+1,k), "starting_inventory_level"])
             self.costs_history.loc[(t,k),"stockout_cost"] = self.stockout_costs[k]*inventory_state.movements.loc[(t,k), "unmet_demand"]
+            self.costs_history.loc[(t,k),"holding_cost_gradient"] = self.holding_costs[k] if inventory_state.movements.loc[(t+1,k), "starting_inventory_level"]>0 else 0
+            self.costs_history.loc[(t,k),"stockout_cost_gradient"] = - (self.stockout_costs[k] if inventory_state.movements.loc[(t+1,k), "starting_inventory_level"]==0 else 0)
     
     def save_history_as_csv(self, file_name:str) -> None :
         self.costs_history.to_csv(os.path.join("cost_histories",file_name))
