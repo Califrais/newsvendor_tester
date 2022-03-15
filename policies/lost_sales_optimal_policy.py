@@ -4,7 +4,7 @@ import numpy as np
 
 from policies.abstract_inventory_policy import AbstractInventoryPolicy
 
-class OptimalLostSalesPolicy(AbstractInventoryPolicy) :
+class LostSalesOptimalPolicy(AbstractInventoryPolicy) :
     """
     Optimal clairvoyant policy for the infinite-horizon lost sales problem with :
         * No volume constraints (the problem is separable per product)
@@ -18,15 +18,22 @@ class OptimalLostSalesPolicy(AbstractInventoryPolicy) :
     
     See Paragraph 4.6.1 of (Fundamentals of Supply Chain Theory)
     """
-    def __init__(self, nb_products, purchase_costs, holding_costs, stockout_costs, discount_factor : float, demand_quantile_functions : List[Callable]) :
-        self.nb_products = nb_products
-        self.base_stock_levels = np.zeros(nb_products)
-        for k in range(nb_products) : 
+    def __init__(self, purchase_costs, holding_costs, stockout_costs, discount_factor : float, demand_quantile_functions : List[Callable], name:str="LostSalesOptimalPolicy") :
+        super().__init__(name)
+        self.nb_products = len(purchase_costs)
+        self.base_stock_levels = np.zeros(self.nb_products)
+
+        for k in range(self.nb_products) : 
             if(holding_costs[k]+stockout_costs[k]-discount_factor*purchase_costs[k] == 0) :
                 print("Costs for product {} leads to a degenerate solution: infinite target level.".format(k))
+
             if((stockout_costs[k]-purchase_costs[k])*(holding_costs[k]+stockout_costs[k]-discount_factor*purchase_costs[k]) <= 0) :
                 print("The optimal unconstrainted strategy for product {} is never order.".format(k))
-            self.base_stock_levels[k] = demand_quantile_functions[k]((stockout_costs[k]-purchase_costs[k])/(holding_costs[k]+stockout_costs[k]-discount_factor*purchase_costs[k]))
+
+            self.base_stock_levels[k] = demand_quantile_functions[k](
+                (stockout_costs[k]-purchase_costs[k])/(holding_costs[k]+stockout_costs[k]-discount_factor*purchase_costs[k])
+            )
+
         print("Optimal unconstrainted base-stock level: {}".format(self.base_stock_levels))
 
     def get_order_quantity(self, t:int, inventory_state:NonPerishableInventoryState) -> np.array :
@@ -41,7 +48,6 @@ class OptimalLostSalesPolicy(AbstractInventoryPolicy) :
         for i in range(self.nb_products) :
             quantities[i] = np.maximum(0,self.base_stock_levels[i] - inventory_state.movements.loc[(t,i),"starting_inventory_level"])
         return quantities
-
 
 """
 class OptimalConstrainedPolicy(AbstractInventoryPolicy) :

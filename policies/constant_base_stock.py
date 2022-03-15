@@ -4,7 +4,8 @@ import numpy as np
 from policies.abstract_inventory_policy import AbstractInventoryPolicy
 
 class ConstantBaseStock(AbstractInventoryPolicy) :
-    def __init__(self,base_stock_levels : np.array) :
+    def __init__(self,base_stock_levels : np.array, name:str="ConstantBaseStock") :
+        super().__init__(name)
         self.base_stock_levels = base_stock_levels
         
     def get_order_quantity(self, t:int, inventory_state:NonPerishableInventoryState) -> np.array :
