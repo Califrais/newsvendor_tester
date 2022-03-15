@@ -1,5 +1,5 @@
 from typing import Callable, List
-from inventory_states import NonPerishableInventoryState
+from non_perishable_inventory_state import NonPerishableInventoryState
 import numpy as np
 
 from policies.abstract_inventory_policy import AbstractInventoryPolicy

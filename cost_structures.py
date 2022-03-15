@@ -2,7 +2,7 @@ import os
 import pandas as pd
 import numpy as np
 
-from inventory_states import NonPerishableInventoryState
+from non_perishable_inventory_state import NonPerishableInventoryState
 
 class CostStructure :
 
