@@ -21,11 +21,11 @@ class TargetLevelOGD(AbstractInventoryPolicy) :
         self.nb_products = len(initial_base_stock)
         self.learning_rate = learning_rate
         self.cost_structure = cost_structure
-        self.base_stock_upper_bound = base_stock_upper_bound
+        self.base_stock_upper_bound = np.array(base_stock_upper_bound)
         self.iterate_on_implemented_levels = iterate_on_implemented_levels
 
-        self.unconstrained_target_levels = initial_base_stock
-        self.implemented_target_levels = initial_base_stock
+        self.unconstrained_target_levels = np.array(initial_base_stock)
+        self.implemented_target_levels = np.array(initial_base_stock)
 
     def get_order_quantity(self, t:int, inventory_state:NonPerishableInventoryState) -> np.array :
         quantities = self.implemented_target_levels
@@ -37,7 +37,11 @@ class TargetLevelOGD(AbstractInventoryPolicy) :
                 )
                 
                 if(self.iterate_on_implemented_levels) :
-                    self.unconstrained_target_levels[k] = np.clip(self.unconstrained_target_levels[k]-self.learning_rate(t)*gradient,0,self.base_stock_upper_bound[k])
+                    self.unconstrained_target_levels[k] = np.clip(
+                        self.unconstrained_target_levels[k]-self.learning_rate(t)*gradient,
+                        0,
+                        self.base_stock_upper_bound[k]
+                    )
                     self.implemented_target_levels[k] = np.maximum(self.unconstrained_target_levels[k],inventory_state.movements.loc[(t,k),"starting_inventory_level"])
                 else :
                     self.implemented_target_levels[k] = np.clip(

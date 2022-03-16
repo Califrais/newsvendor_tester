@@ -21,11 +21,11 @@ class TargetLevelLinearizedFTRL(AbstractInventoryPolicy) :
         self.nb_products = len(initial_base_stock)
         self.learning_rate = learning_rate
         self.cost_structure = cost_structure
-        self.base_stock_upper_bound = base_stock_upper_bound
+        self.base_stock_upper_bound = np.array(base_stock_upper_bound)
         self.project_on_the_highest_dynamic_constraint = project_on_the_highest_dynamic_constraint
 
-        self.initial_base_stock = initial_base_stock
-        self.implemented_target_levels = initial_base_stock
+        self.initial_base_stock = np.array(initial_base_stock)
+        self.implemented_target_levels = np.array(initial_base_stock)
         self.accumulated_gradients = np.zeros(self.nb_products)
 
     def get_order_quantity(self, t:int, inventory_state:NonPerishableInventoryState) -> np.array :
