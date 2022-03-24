@@ -21,11 +21,11 @@ class TargetLevelOGD(AbstractInventoryPolicy) :
         self.nb_products = len(initial_base_stock)
         self.learning_rate = learning_rate
         self.cost_structure = cost_structure
-        self.base_stock_upper_bound = np.array(base_stock_upper_bound)
+        self.base_stock_upper_bound = np.array(base_stock_upper_bound,dtype=float)
         self.iterate_on_implemented_levels = iterate_on_implemented_levels
 
-        self.unconstrained_target_levels = np.array(initial_base_stock)
-        self.implemented_target_levels = np.array(initial_base_stock)
+        self.unconstrained_target_levels = np.array(initial_base_stock,dtype=float)
+        self.implemented_target_levels = np.array(initial_base_stock,dtype=float)
 
     def get_order_quantity(self, t:int, inventory_state:NonPerishableInventoryState) -> np.array :
         quantities = self.implemented_target_levels

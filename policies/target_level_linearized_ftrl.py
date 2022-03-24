@@ -21,29 +21,41 @@ class TargetLevelLinearizedFTRL(AbstractInventoryPolicy) :
         self.nb_products = len(initial_base_stock)
         self.learning_rate = learning_rate
         self.cost_structure = cost_structure
-        self.base_stock_upper_bound = np.array(base_stock_upper_bound)
+        self.base_stock_upper_bound = np.array(base_stock_upper_bound,dtype=float)
         self.project_on_the_highest_dynamic_constraint = project_on_the_highest_dynamic_constraint
 
-        self.initial_base_stock = np.array(initial_base_stock)
-        self.implemented_target_levels = np.array(initial_base_stock)
-        self.accumulated_gradients = np.zeros(self.nb_products)
+        self.initial_base_stock = np.array(initial_base_stock,dtype=float)
+        self.accumulated_gradients = np.zeros(self.nb_products,dtype=float)
+        self.lower_bounds = np.zeros(self.nb_products,dtype=float)
 
     def get_order_quantity(self, t:int, inventory_state:NonPerishableInventoryState) -> np.array :
-        quantities = self.implemented_target_levels
+        quantities = self.initial_base_stock
         if(t>1) :
             for k in range(self.nb_products) :
-                self.accumulated_gradients[k] += (
-                    self.cost_structure.costs_history.loc[(t-1,k),"holding_cost_gradient"]
-                    + self.cost_structure.costs_history.loc[(t-1,k),"stockout_cost_gradient"]
-                )
+                #
+                starting_inventory_level = inventory_state.get_inventory_level(k)
+
+                # Updating gradient estimates
+                if(starting_inventory_level>0) :
+                    last_gradient = self.cost_structure.holding_costs[k]
+                else :
+                    last_gradient = -self.cost_structure.stockout_costs[k]
+                self.accumulated_gradients[k] += last_gradient
+
+                # Computing the lower bound
+                if(self.project_on_the_highest_dynamic_constraint) :
+                    self.lower_bounds[k] = np.maximum(self.lower_bounds[k], starting_inventory_level)
+                else :
+                    self.lower_bounds[k] = starting_inventory_level
                 
-                self.implemented_target_levels[k] = np.clip(
+                # Computing target level
+                target = np.clip(
                     self.initial_base_stock[k]-self.learning_rate(t)*self.accumulated_gradients[k],
-                    np.max(inventory_state.movements.loc[(slice(0,t),k),"starting_inventory_level"])
-                    if self.project_on_the_highest_dynamic_constraint 
-                    else inventory_state.movements.loc[(t,k),"starting_inventory_level"],
+                    self.lower_bounds[k],
                     self.base_stock_upper_bound[k]
                 )
+                assert ((target>=self.lower_bounds[k]) and (target<=self.base_stock_upper_bound[k])), "Projection error"
+                assert ((target - starting_inventory_level) >= 0), "The target is below the current inventory level"
 
-                quantities[k] = np.maximum(0,self.implemented_target_levels[k] - inventory_state.movements.loc[(t,k),"starting_inventory_level"])
+                quantities[k] = target - starting_inventory_level
         return quantities

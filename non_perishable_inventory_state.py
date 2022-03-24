@@ -38,6 +38,8 @@ class NonPerishableInventoryState :
     def save_movements_as_csv(self, file_name:str) -> None :
         self.movements.to_csv(os.path.join("inventory_movements",file_name))
 
+    def get_inventory_level(self, product_id:int) -> float :
+        return self.__state[product_id][0]
 
     def step(self, t:int, order_quantities: np.array, demands: np.array) -> None :
         for k in range(self.nb_products) :
