@@ -48,15 +48,3 @@ class LostSalesOptimalPolicy(AbstractInventoryPolicy) :
         for i in range(self.nb_products) :
             quantities[i] = np.maximum(0,self.base_stock_levels[i] - inventory_state.movements.loc[(t,i),"starting_inventory_level"])
         return quantities
-
-"""
-class OptimalConstrainedPolicy(AbstractInventoryPolicy) :
-    
-    Optimal clairvoyant policy for the multi-item volume-constrained lost sales problem with :
-        * Zero fixed cost
-        * Zero lead time
-
-    See Theorem 1 of (Shi, C., Chen, W., & Duenyas, I. (2016). Nonparametric data-driven algorithms for multiproduct inventory systems with censored demand)
-    or (Ignall, E., A. F. Veinott. 1969. Optimality of myopic inventory policies for several substitute products)
-    pass
-"""

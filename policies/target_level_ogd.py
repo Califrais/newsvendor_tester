@@ -31,24 +31,29 @@ class TargetLevelOGD(AbstractInventoryPolicy) :
         quantities = self.implemented_target_levels
         if(t>1) :
             for k in range(self.nb_products) :
-                gradient = (
-                    self.cost_structure.costs_history.loc[(t-1,k),"holding_cost_gradient"]
-                    + self.cost_structure.costs_history.loc[(t-1,k),"stockout_cost_gradient"]
-                )
-                
-                if(self.iterate_on_implemented_levels) :
-                    self.unconstrained_target_levels[k] = np.clip(
-                        self.unconstrained_target_levels[k]-self.learning_rate(t)*gradient,
-                        0,
-                        self.base_stock_upper_bound[k]
-                    )
-                    self.implemented_target_levels[k] = np.maximum(self.unconstrained_target_levels[k],inventory_state.movements.loc[(t,k),"starting_inventory_level"])
+                if(inventory_state.movements.loc[(t-1,k),"sales"] == inventory_state.movements.loc[(t-1,k),"interim_inventory_level"]) :
+                    # there has been lost sales on the implemented system
+                    gradient = -self.cost_structure.stockout_costs[k]
                 else :
-                    self.implemented_target_levels[k] = np.clip(
-                        self.implemented_target_levels[k]-self.learning_rate(t)*gradient,
-                        inventory_state.movements.loc[(t,k),"starting_inventory_level"],
-                        self.base_stock_upper_bound[k]
-                    )
+                    # no lost sales on the implemented system, thus, demand = sales
+                    if(self.unconstrained_target_levels[k] > inventory_state.movements.loc[(t-1,k),"sales"]) :
+                        # no lost sales on the unconstrainted system too
+                        gradient = self.cost_structure.holding_costs[k]
+                    else :
+                        gradient = -self.cost_structure.stockout_costs[k]
+                
+                # Updating the unconstrained system
+                self.unconstrained_target_levels[k] = np.clip(
+                    self.unconstrained_target_levels[k]-self.learning_rate(t)*gradient,
+                    0,
+                    self.base_stock_upper_bound[k]
+                )
+
+                # Updating the implemented system
+                self.implemented_target_levels[k] = np.maximum(
+                    self.unconstrained_target_levels[k],
+                    inventory_state.movements.loc[(t,k),"starting_inventory_level"]
+                )
 
                 quantities[k] = np.maximum(0,self.implemented_target_levels[k] - inventory_state.movements.loc[(t,k),"starting_inventory_level"])
         return quantities
