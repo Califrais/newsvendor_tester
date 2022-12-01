@@ -24,14 +24,16 @@ class Environment :
     def get_sales(self,t, level) -> np.array :
         pass
 
-class Environment_NonPerishable_L1(Environment) :
+class Environment_NonPerishable_Newsvendor(Environment) :
     """
     Multi-product lost sales inventory system with non-perishable products with lognormal demands and l1-norm loss.
     """
-    def __init__(self, demands) :
+    def __init__(self, demands, holding_costs, penalty_costs) :
         self.horizon, self.nb_products = demands.shape
         self.horizon -= 1
         self.demands = demands
+        self.holding_costs = holding_costs
+        self.penalty_costs = penalty_costs
 
     def reset(self) :
         pass
@@ -42,25 +44,27 @@ class Environment_NonPerishable_L1(Environment) :
         return np.maximum(0,last_decision-self.demands[t-1])
     
     def get_loss(self, t, decision) :
-        return np.sum(np.abs(decision-self.demands[t]))
-    
+        return np.sum(self.holding_costs*np.maximum(0,decision-self.demands[t])+self.penalty_costs*np.maximum(0,self.demands[t]-decision))
+
     def get_sales(self,t,decision) :
         return np.minimum(decision, self.demands[t])
 
     def get_subgradient(self,t, decision) :
-        return np.where(decision>self.demands[t],1,-1)
+        return np.where(decision>self.demands[t],self.holding_costs,-self.penalty_costs)
     
     def get_demand(self,t) :
         return self.demands[t]
 
-class Environment_Perishable_L1(Environment) :
+class Environment_Perishable_Newsvendor(Environment) :
     """
     Multi-product lost sales perishable inventory system with lognormal demands and l1-norm loss.
     """
-    def __init__(self, lifetime:int, demands) :
+    def __init__(self, lifetime:int, demands, holding_costs, penalty_costs) :
         self.horizon, self.nb_products = demands.shape
         self.horizon -= 1
         self.demands = demands
+        self.holding_costs = holding_costs
+        self.penalty_costs = penalty_costs
 
         self.lifetime = lifetime
         self.reset()
@@ -81,13 +85,13 @@ class Environment_Perishable_L1(Environment) :
         return np.array(self.state[:,self.lifetime-2])
 
     def get_loss(self, t, decision) :
-        return np.sum(np.abs(decision-self.demands[t]))
+        return np.sum(self.holding_costs*np.maximum(0,decision-self.demands[t])+self.penalty_costs*np.maximum(0,self.demands[t]-decision))
 
     def get_sales(self,t,decision) :
         return np.minimum(decision, self.demands[t])
 
     def get_subgradient(self,t, decision) :
-        return np.where(decision>self.demands[t],1,-1)
+        return np.where(decision>self.demands[t],self.holding_costs,-self.penalty_costs)
 
     def get_demand(self,t) :
         return self.demands[t]

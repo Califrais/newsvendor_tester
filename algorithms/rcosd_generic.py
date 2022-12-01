@@ -16,7 +16,7 @@ class RCOSD_generic_algorithm(Algorithm) :
 
     def next_decision(self, t, state, subgradient, sales, demands):
         if(t==1) :
-            self.decision = np.array(self.initial_decision)
+            self.decision = np.array(self.initial_decision,dtype=np.float64)
         else :
             self.cycle_gradient += subgradient
             if(self.trigger_event(t,state,subgradient,sales,demands)) :
@@ -37,5 +37,5 @@ class RCOSD_generic_algorithm(Algorithm) :
         self.cycle_counter = 1
         self.last_update_period = 1
 
-        self.decision = np.array(self.initial_decision)
+        self.decision = np.array(self.initial_decision,dtype=np.float64)
 
