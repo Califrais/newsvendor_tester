@@ -79,8 +79,8 @@ class Environment_Perishable_Newsvendor(Environment) :
             new_state = np.zeros(self.state.shape)
             for k in range(self.nb_products) :
                 for i in range(self.lifetime-2) :
-                    new_state[k,i] = np.maximum(0, self.state[k,i+1] - self.demands[t-1]-np.maximum(0,self.state[k,0]-self.demands[t-1]))
-                new_state[k,self.lifetime-2] = np.maximum(0, last_decision - self.demands[t-1]-np.maximum(0,self.state[k,0]-self.demands[t-1]))
+                    new_state[k,i] = np.maximum(0, self.state[k,i+1] - self.demands[t-1,k]-np.maximum(0,self.state[k,0]-self.demands[t-1,k]))
+                new_state[k,self.lifetime-2] = np.maximum(0, last_decision[k] - self.demands[t-1,k]-np.maximum(0,self.state[k,0]-self.demands[t-1,k]))
             self.state = new_state
         return np.array(self.state[:,self.lifetime-2])
 

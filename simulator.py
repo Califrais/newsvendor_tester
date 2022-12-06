@@ -39,7 +39,7 @@ class Simulator :
             for alg_index in range(0,self.nb_algs) :
                 yt, gt, st, dt = np.zeros(self.nb_products), np.zeros(self.nb_products), np.zeros(self.nb_products), np.zeros(self.nb_products)
                 cum_lt = 0
-                flag_raised = False
+                #flag_raised = False
                 horizon_index = 0
                 self.algs[alg_index].reset()
 
@@ -47,10 +47,10 @@ class Simulator :
                     xt = env.get_state(t,yt)
                     yt = self.algs[alg_index].next_decision(t,xt,gt,st,dt)
 
-                    if((not flag_raised ) and (yt<xt).any()) :
+                    if((yt<xt).any()) :
                         print("Undershooting error for alg {} at period {}:".format(alg_index,t))
                         print("x_t = {}, y_t = {}".format(xt,yt))
-                        flag_raised = True
+                        #flag_raised = True
                     
                     cum_lt += env.get_loss(t,yt)
                     if(t in self.horizons) :
