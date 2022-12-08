@@ -47,7 +47,7 @@ class Simulator :
                     xt = env.get_state(t,yt)
                     yt = self.algs[alg_index].next_decision(t,xt,gt,st,dt)
 
-                    if((yt<xt).any()) :
+                    if((yt-xt<-10**-5).any()) :
                         print("Undershooting error for alg {} at period {}:".format(alg_index,t))
                         print("x_t = {}, y_t = {}".format(xt,yt))
                         #flag_raised = True
