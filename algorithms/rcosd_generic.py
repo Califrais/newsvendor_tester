@@ -22,9 +22,9 @@ class RCOSD_generic_algorithm(Algorithm) :
             if(self.trigger_event(t,state,subgradient,sales,demands)) :
                 self.accumulated_cycle_gradients_norm_squared += np.sum(self.cycle_gradient*self.cycle_gradient)
 
-                relaxation_paramater_value = self.relaxation_parameter(t,self.cycle_counter,self.last_update_period)
-                learning_rate_value = self.learning_rate(t,self.cycle_counter,self.accumulated_cycle_gradients_norm_squared)
-                self.decision = (1-relaxation_paramater_value)*self.projection(self.decision-learning_rate_value*self.cycle_gradient) + relaxation_paramater_value*self.decision
+                relaxation_paramater_value = self.relaxation_parameter(t)
+                learning_rate_value = self.learning_rate(t)
+                self.decision = (1-relaxation_paramater_value)*self.projection(self.decision-learning_rate_value*self.cycle_gradient,state) + relaxation_paramater_value*self.decision
 
                 self.cycle_counter += 1
                 self.last_update_period = t

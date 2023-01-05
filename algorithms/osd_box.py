@@ -8,12 +8,12 @@ class OSD_Box_algorithm(RCOSD_generic_algorithm) :
         self.diameter = np.sqrt((y_max-y_min)*(y_max-y_min))
         self.G = G
 
-        def learning_rate(t,cycle_counter, accumulated_cycle_gradients_norm_squared) :
+        def learning_rate(t) :
             return self.gamma*self.diameter/(self.G*np.sqrt((t-1)))
 
-        projection = lambda y : np.clip(y,y_min,y_max)
+        projection = lambda y,state : np.clip(y,y_min,y_max)
         trigger_event = lambda t, state, subgradient, sales, demands : True
-        relaxation_parameter = lambda t,cycle_counter,last_update_period : 0
+        relaxation_parameter = lambda t : 0
 
         super().__init__(initial_decision, learning_rate, projection, trigger_event, relaxation_parameter)
 

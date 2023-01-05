@@ -30,10 +30,11 @@ class Simulator :
             env = self.env_generator()
             for horizon_index in range(len(self.horizons)) :
                 optimal_decision = np.zeros(self.nb_products)
+                cum_losses[seed_id,0,horizon_index] = 0
                 for i in range(self.nb_products) :
                     optimal_decision[i] = np.quantile(env.demands[1:self.horizons[horizon_index]+1,i], self.penalty_costs[i]/(self.holding_costs[i]+self.penalty_costs[i]))
-                cum_losses[seed_id,0,horizon_index] = np.sum(self.holding_costs*np.maximum(0,optimal_decision-env.demands[1:self.horizons[horizon_index]+1])
-                    + self.penalty_costs*np.maximum(0,env.demands[1:self.horizons[horizon_index]+1]-optimal_decision))
+                    cum_losses[seed_id,0,horizon_index] += np.sum(self.holding_costs[i]*np.maximum(0,optimal_decision[i]-env.demands[1:self.horizons[horizon_index]+1,i])
+                    + self.penalty_costs[i]*np.maximum(0,env.demands[1:self.horizons[horizon_index]+1,i]-optimal_decision[i]))
                 assert self.condition_on_optimum(optimal_decision), "Condition on optimum failed"
 
             for alg_index in range(0,self.nb_algs) :

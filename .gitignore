@@ -1,2 +1,5 @@
 .DS_Store
 __pycache__
+50_products_data.csv
+preprocessing_script.py
+main_query.sql

@@ -6,14 +6,14 @@ class COSD_Adaptive_Box_algorithm(RCOSD_generic_algorithm) :
         self.gamma = gamma
         self.diameter = np.sqrt((y_max-y_min)*(y_max-y_min))
 
-        def learning_rate(t,cycle_counter, accumulated_cycle_gradients_norm_squared) :
-            if(accumulated_cycle_gradients_norm_squared == 0) :
+        def learning_rate(t) :
+            if(self.accumulated_cycle_gradients_norm_squared == 0) :
                 return 0
-            return self.gamma*self.diameter/np.sqrt(accumulated_cycle_gradients_norm_squared)
+            return self.gamma*self.diameter/np.sqrt(self.accumulated_cycle_gradients_norm_squared)
 
-        projection = lambda y : np.clip(y,y_min,y_max)
+        projection = lambda y, state : np.clip(y,y_min,y_max)
         trigger_event = lambda t, state, subgradient, sales, demands : (demands>0).all()
-        relaxation_parameter = lambda t,cycle_counter,last_update_period : 0
+        relaxation_parameter = lambda t : 0
 
         super().__init__(initial_decision, learning_rate, projection, trigger_event, relaxation_parameter)
 

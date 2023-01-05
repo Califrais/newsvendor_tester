@@ -7,12 +7,12 @@ class CUP_algorithm(RCOSD_generic_algorithm) :
         self.diameter = np.sqrt((y_max-y_min)*(y_max-y_min))
         self.G = G
 
-        def learning_rate(t,cycle_counter, accumulated_cycle_gradients_norm_squared) :
-            return self.gamma*self.diameter/(self.G*np.sqrt(cycle_counter))
+        def learning_rate(t) :
+            return self.gamma*self.diameter/(self.G*np.sqrt(self.cycle_counter))
 
-        projection = lambda y : np.clip(y,y_min,y_max)
+        projection = lambda y,state : np.clip(y,y_min,y_max)
         trigger_event = lambda t, state, subgradient, sales, demands : (state==0).all()
-        relaxation_parameter = lambda t,cycle_counter,last_update_period : 0
+        relaxation_parameter = lambda t : 0
 
         super().__init__(initial_decision, learning_rate, projection, trigger_event, relaxation_parameter)
 
