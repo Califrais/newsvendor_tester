@@ -2,15 +2,14 @@ from typing import Callable
 from algorithms.algorithm import Algorithm
 import numpy as np
 
-class RCOSD_generic_algorithm(Algorithm) :
+class COSD_generic_algorithm(Algorithm) :
     
-    def __init__(self, initial_decision: np.array, learning_rate: Callable, projection: Callable, trigger_event: Callable, relaxation_parameter:Callable) :
+    def __init__(self, initial_decision: np.array, learning_rate: Callable, projection: Callable, trigger_event: Callable) :
         self.nb_products, = initial_decision.shape
         self.initial_decision = initial_decision
         self.learning_rate = learning_rate
         self.projection = projection
         self.trigger_event = trigger_event
-        self.relaxation_parameter = relaxation_parameter
 
         self.reset()
 
@@ -22,9 +21,8 @@ class RCOSD_generic_algorithm(Algorithm) :
             if(self.trigger_event(t,state,subgradient,sales,demands)) :
                 self.accumulated_cycle_gradients_norm_squared += np.sum(self.cycle_gradient*self.cycle_gradient)
 
-                relaxation_paramater_value = self.relaxation_parameter(t)
                 learning_rate_value = self.learning_rate(t)
-                self.decision = (1-relaxation_paramater_value)*self.projection(self.decision-learning_rate_value*self.cycle_gradient,state) + relaxation_paramater_value*self.decision
+                self.decision = self.projection(self.decision-learning_rate_value*self.cycle_gradient,state)
 
                 self.cycle_counter += 1
                 self.last_update_period = t

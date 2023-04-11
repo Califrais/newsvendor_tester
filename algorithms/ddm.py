@@ -41,6 +41,6 @@ class DDM_algorithm(Algorithm) :
 
 
     def __str__(self) :
-        return r"DDM $\gamma={}$".format(self.gamma)
+        return r"DDM $\gamma={:.3e}$".format(self.gamma)
 
    

@@ -1,9 +1,9 @@
 from typing import Callable
-from algorithms.rcosd_generic import RCOSD_generic_algorithm
+from algorithms.cosd_generic import COSD_generic_algorithm
 import utils
 import numpy as np
 
-class COSD_Variant2_Volume_Constrained_algorithm(RCOSD_generic_algorithm) :
+class MaxCOSD_Volume_Constrained_algorithm(COSD_generic_algorithm) :
     
     def __init__(self, initial_decision:np.array, volumes:np.array, total_volume:float, gamma) :
         self.gamma = gamma
@@ -22,12 +22,10 @@ class COSD_Variant2_Volume_Constrained_algorithm(RCOSD_generic_algorithm) :
             if(self.accumulated_cycle_gradients_norm_squared+np.sum(self.cycle_gradient*self.cycle_gradient) > 0 ) :
                 learning_rate_value = self.gamma*self.diameter/np.sqrt(self.accumulated_cycle_gradients_norm_squared+np.sum(self.cycle_gradient*self.cycle_gradient))
 
-            return ( state <= utils.projection(self.decision-learning_rate_value*self.cycle_gradient, volumes, total_volume) ).all()
-
-        relaxation_parameter = lambda t : 0
+            return ( state <= projection(self.decision-learning_rate_value*self.cycle_gradient, state) ).all()
         
-        super().__init__(initial_decision, learning_rate, projection, trigger_event, relaxation_parameter)
+        super().__init__(initial_decision, learning_rate, projection, trigger_event)
 
     
     def __str__(self) :
-        return r"COSD Variant2 $\gamma={}$".format(self.gamma)
+        return r"MaxCOSD $\gamma={:.3e}$".format(self.gamma)

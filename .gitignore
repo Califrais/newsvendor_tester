@@ -1,5 +1,7 @@
 .DS_Store
 __pycache__
-50_products_data.csv
-preprocessing_script.py
-main_query.sql
+trash
+califrais_experiments
+m5_experiments/m5_costs.csv
+m5_experiments/m5_demands.csv
+m5_experiments/data

@@ -27,7 +27,7 @@ class AIM_algorithm(Algorithm) :
         return np.array(self.implemented_decision)
 
     def __str__(self) :
-        return r"AIM $\gamma={}$".format(self.gamma)
+        return r"AIM $\gamma={:.3e}$".format(self.gamma)
     
     def reset(self) :
         self.target_decision = np.array(self.initial_decision,dtype=np.float64)

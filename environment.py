@@ -26,7 +26,7 @@ class Environment :
 
 class Environment_NonPerishable_Newsvendor(Environment) :
     """
-    Multi-product lost sales inventory system with non-perishable products with lognormal demands and l1-norm loss.
+    Multi-product lost sales inventory system with non-perishable products with newsvendor loss.
     """
     def __init__(self, demands, holding_costs, penalty_costs) :
         self.horizon, self.nb_products = demands.shape
@@ -57,7 +57,7 @@ class Environment_NonPerishable_Newsvendor(Environment) :
 
 class Environment_Perishable_Newsvendor(Environment) :
     """
-    Multi-product lost sales perishable inventory system with lognormal demands and l1-norm loss.
+    Multi-product lost sales perishable inventory system with newsvendor loss.
     """
     def __init__(self, lifetime:int, demands, holding_costs, penalty_costs) :
         self.horizon, self.nb_products = demands.shape

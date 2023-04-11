@@ -1,17 +1,19 @@
-from typing import Callable
+from typing import Callable, List
 import numpy as np
 from tqdm import tqdm
-import scipy.stats 
+import scipy.stats
+
+from environment import Environment 
 
 class Simulator :
 
-    def __init__(self, env_generator: Callable, nb_products:int, nb_samples: int, horizons:np.array, algs: list, condition_on_optimum:Callable, holding_costs, penalty_costs, first_seed = 1, ) :
+    def __init__(self, envs: List[Environment], nb_products:int, nb_samples: int, horizons:np.array, algs: list, condition_on_optimum:Callable, holding_costs, penalty_costs, first_seed = 1) :
         self.nb_algs = len(algs)
         self.algs = algs
         self.nb_products= nb_products
         self.nb_samples = nb_samples
         self.horizons = horizons
-        self.env_generator = env_generator
+        self.envs = envs
         self.condition_on_optimum = condition_on_optimum
         self.holding_costs = holding_costs
         self.penalty_costs = penalty_costs
@@ -21,21 +23,16 @@ class Simulator :
     def run(self) :
         cum_losses = np.zeros((self.nb_samples, self.nb_algs+1,len(self.horizons)))
 
-        np.random.seed(self.first_seed)
-        seeds = np.random.randint(0,self.nb_samples,self.nb_samples)
-
-        for seed_id in tqdm(range(self.nb_samples)) : 
-
-            np.random.seed(seeds[seed_id])
-            env = self.env_generator()
+        for sample_id in tqdm(range(self.nb_samples)) : 
+            env = self.envs[sample_id]
             for horizon_index in range(len(self.horizons)) :
                 optimal_decision = np.zeros(self.nb_products)
-                cum_losses[seed_id,0,horizon_index] = 0
+                cum_losses[sample_id,0,horizon_index] = 0
                 for i in range(self.nb_products) :
                     optimal_decision[i] = np.quantile(env.demands[1:self.horizons[horizon_index]+1,i], self.penalty_costs[i]/(self.holding_costs[i]+self.penalty_costs[i]))
-                    cum_losses[seed_id,0,horizon_index] += np.sum(self.holding_costs[i]*np.maximum(0,optimal_decision[i]-env.demands[1:self.horizons[horizon_index]+1,i])
+                    cum_losses[sample_id,0,horizon_index] += np.sum(self.holding_costs[i]*np.maximum(0,optimal_decision[i]-env.demands[1:self.horizons[horizon_index]+1,i])
                     + self.penalty_costs[i]*np.maximum(0,env.demands[1:self.horizons[horizon_index]+1,i]-optimal_decision[i]))
-                assert self.condition_on_optimum(optimal_decision), "Condition on optimum failed"
+                assert self.condition_on_optimum(optimal_decision), "The optimal order-up-to level does not satisfy the constraints, please consider less restrictive constraints."
 
             for alg_index in range(0,self.nb_algs) :
                 yt, gt, st, dt = np.zeros(self.nb_products), np.zeros(self.nb_products), np.zeros(self.nb_products), np.zeros(self.nb_products)
@@ -55,7 +52,7 @@ class Simulator :
                     
                     cum_lt += env.get_loss(t,yt)
                     if(t in self.horizons) :
-                        cum_losses[seed_id,alg_index+1, horizon_index] = cum_lt
+                        cum_losses[sample_id,alg_index+1, horizon_index] = cum_lt
                         horizon_index += 1
                     
                     gt = env.get_subgradient(t,yt)
