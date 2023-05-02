@@ -24,7 +24,6 @@ class DDM_algorithm(Algorithm) :
             return np.array(self.implemented_decision,dtype=np.float64)
         else :
             if((self.implemented_decision >= self.target_decision).all()) :
-                print("{}: trigger at {}".format(self,t))
                 subgradient_at_target = np.where(self.target_decision>demands,self.holding_costs,-self.penalty_costs) 
                 learning_rate = self.gamma * self.diameter / ( self.G*np.sqrt(t) )
                 self.target_decision = utils.projection(self.target_decision-learning_rate*subgradient_at_target, self.volumes, self.total_volume)
