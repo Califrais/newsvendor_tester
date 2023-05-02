@@ -20,22 +20,26 @@ class DDM_algorithm(Algorithm) :
         self.target_decision = np.array(self.initial_decision,dtype=np.float64)
 
     def next_decision(self,t, state, subgradient, sales, demands) :
-        if((self.implemented_decision >= self.target_decision).all()) :
-            subgradient_at_target = np.where(self.target_decision>demands,self.holding_costs,-self.penalty_costs) 
-            learning_rate = self.gamma * self.diameter / ( self.G*np.sqrt(t) )
-            self.target_decision = utils.projection(self.target_decision-learning_rate*subgradient_at_target, self.volumes, self.total_volume)
-        
-        j_indexes = np.where(state>self.target_decision)[0]
-        j_complementary_indexes = np.where(state<=self.target_decision)[0]
-        self.implemented_decision[j_indexes] = state[j_indexes]
+        if(t==1) :
+            return np.array(self.implemented_decision,dtype=np.float64)
+        else :
+            if((self.implemented_decision >= self.target_decision).all()) :
+                print("{}: trigger at {}".format(self,t))
+                subgradient_at_target = np.where(self.target_decision>demands,self.holding_costs,-self.penalty_costs) 
+                learning_rate = self.gamma * self.diameter / ( self.G*np.sqrt(t) )
+                self.target_decision = utils.projection(self.target_decision-learning_rate*subgradient_at_target, self.volumes, self.total_volume)
+            
+            j_indexes = np.where(state>self.target_decision)[0]
+            j_complementary_indexes = np.where(state<=self.target_decision)[0]
+            self.implemented_decision[j_indexes] = state[j_indexes]
 
-        if(len(j_complementary_indexes) > 0) :
-            self.implemented_decision[j_complementary_indexes] = utils.projection(
-                self.target_decision[j_complementary_indexes],
-                self.volumes[j_complementary_indexes],
-                self.total_volume-np.sum((self.volumes*state)[j_indexes]),
-                state[j_complementary_indexes]
-            )
+            if(len(j_complementary_indexes) > 0) :
+                self.implemented_decision[j_complementary_indexes] = utils.projection(
+                    self.target_decision[j_complementary_indexes],
+                    self.volumes[j_complementary_indexes],
+                    self.total_volume-np.sum((self.volumes*state)[j_indexes]),
+                    state[j_complementary_indexes]
+                )
 
         return np.array(self.implemented_decision)
 
