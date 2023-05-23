@@ -23,7 +23,7 @@ class Simulator :
     def run(self) :
         cum_losses = np.zeros((self.nb_samples, self.nb_algs+1,len(self.horizons)))
 
-        for sample_id in tqdm(range(self.nb_samples)) : 
+        for sample_id in range(self.nb_samples) : 
             env = self.envs[sample_id]
             for horizon_index in range(len(self.horizons)) :
                 optimal_decision = np.zeros(self.nb_products)
@@ -34,7 +34,7 @@ class Simulator :
                     + self.penalty_costs[i]*np.maximum(0,env.demands[1:self.horizons[horizon_index]+1,i]-optimal_decision[i]))
                 assert self.condition_on_optimum(optimal_decision), "The optimal order-up-to level does not satisfy the constraints, please consider less restrictive constraints."
 
-            for alg_index in range(0,self.nb_algs) :
+            for alg_index in tqdm(range(0,self.nb_algs)) :
                 yt, gt, st, dt = np.zeros(self.nb_products), np.zeros(self.nb_products), np.zeros(self.nb_products), np.zeros(self.nb_products)
                 cum_lt = 0
                 #flag_raised = False

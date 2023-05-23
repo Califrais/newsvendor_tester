@@ -1,6 +1,4 @@
 m5_directory_path: m5_experiments/data
 selling_cost_to_holding_cost_factor: 0.016
 selling_cost_to_penalty_cost_factor: 3.2
-product_list: ['FOODS_3_586', 'FOODS_3_694', 'FOODS_3_080', 'FOODS_3_555',
-  'FOODS_3_714', 'FOODS_3_252', 'FOODS_3_226', 'FOODS_3_377',
-  'FOODS_3_668', 'FOODS_3_228']
+store_id: CA_1

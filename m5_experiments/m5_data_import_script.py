@@ -12,22 +12,21 @@ def save_demands(Y_df:pd.DataFrame, S_df:pd.DataFrame, config) :
     """
     Subsampling, preprocessing and saving the demand series
     """
-    store_list = S_df.store_id.unique()
-    product_list = config["product_list"]
+    product_list = S_df.item_id.unique() 
 
     start_date = Y_df.ds.min()
     end_date = Y_df.ds.max()
     nb_days = (end_date-start_date).days +1
 
     demands_df = Y_df.merge(S_df[["unique_id", "item_id", "store_id"]], on="unique_id")
-    demands_df = demands_df.loc[demands_df.item_id.isin(product_list)]
+    demands_df = demands_df.loc[demands_df.store_id == config["store_id"]] ###############
     demands_df["ds"] = (demands_df["ds"]-start_date).dt.days +1
     demands_df = (
-        demands_df.drop("unique_id",axis="columns")
-        .set_index(["store_id", "ds", "item_id"])
-        .reindex(pd.MultiIndex.from_product([store_list, range(nb_days+1), product_list], names=["store_id", "ds", "item_id"]), fill_value=0.0)
+        demands_df.drop(["unique_id", "store_id"],axis="columns")
+        .set_index(["ds", "item_id"])
+        .reindex(pd.MultiIndex.from_product([range(nb_days+1), product_list], names=["ds", "item_id"]), fill_value=0.0)
         .reset_index()
-        .rename({"store_id":"sample_id", "ds":"period", "item_id":"product_id", "y":"quantity"},axis="columns")
+        .rename({"ds":"period", "item_id":"product_id", "y":"quantity"},axis="columns")
         .to_csv("m5_experiments/m5_demands.csv", index=False)
     )
 
@@ -35,7 +34,7 @@ def save_costs(X_df:pd.DataFrame, S_df:pd.DataFrame, config) :
     """
     Subsampling, preprocessing and saving the costs data
     """
-    product_list = config["product_list"]
+    product_list = S_df.item_id.unique()
     selling_cost_to_holding_cost_factor = config["selling_cost_to_holding_cost_factor"]
     selling_cost_to_penalty_cost_factor = config["selling_cost_to_penalty_cost_factor"]
     costs = (
