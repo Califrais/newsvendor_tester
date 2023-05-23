@@ -4,6 +4,6 @@ trash
 califrais_experiments
 m5_experiments/m5_costs.csv
 m5_experiments/m5_demands.csv
-m5_experiments/data
+m5_experiments/data/m5
 setting_5.pickle
 m5_experiments/m5_series_exploration.ipynb
